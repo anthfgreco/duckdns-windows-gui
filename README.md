@@ -1,23 +1,23 @@
-# DuckDNS Client
-DuckDns Updater is a Windows tray application that allows you to keep your dynamic hostname’s IP address up-to-date (and in sync) with DuckDns DNS service at www.DuckDns.org
+# DuckDNS Updater for Windows
 
-# Application Download
-You can download the application in jar, zip & rar format here:
-http://www.etx.ca/products/windows-applications/duckdns-update-client/
+Lightweight system tray app that keeps your duckdns.org domain
+pointed at your current public IP.
 
-# Source Code & Licensing
-Application is coded entirely in Java and only Eclipse was used during the process. As far as third party libraries only dependency is on JSoup (http://jsoup.org). 
-You can create jar files using following setup instructions: https://goo.gl/7wRTFQ
-You're welcome to help to further enhance this project.
+## Download
 
-# License
-This project is released under GNU GENERAL PUBLIC LICENSE - Version 2, June 1991
+Get DuckDNS-Updater.jar from [Releases], then run:
+`java -jar DuckDNS-Updater.jar` (Java 11+, nothing else needed)
 
-# Support
-Having trouble? Contact me, I'll try to help as much as I can.
+## Setup
 
-# Author / Contact
-@JozefJarosciak 
-ETX Software Inc. (http://www.etx.ca)
-Blog: http://www.joe0.com
-LinkedIn Contact: https://www.linkedin.com/in/jozefj
+1. Get your domain + token at duckdns.org
+2. Tray icon → DuckDNS Settings → enter them, pick interval
+3. Done, it only calls the API when your IP changes
+
+## Build
+
+`pwsh ./build.ps1` (JDK 11+)
+
+GPL-2.0. Fork of DuckDNSClient (ETX Software), modernized:
+HTTPS via the JDK http client, jsoup removed, input trimmed
+and URL-encoded, no credentials in error paths.
