@@ -1,5 +1,7 @@
 param(
-  [string]$OutputDir = "dist"
+  [string]$OutputDir = "dist",
+  [switch]$Bundle,
+  [string]$Version = "1.0.0"
 )
 
 $ErrorActionPreference = "Stop"
@@ -71,3 +73,47 @@ if ($LASTEXITCODE -ne 0) {
 
 Write-Host "built $outJar"
 Write-Host "run it with: java -jar `"$outJar`""
+
+if ($Bundle) {
+  $jpackage = Join-Path $javaBin "jpackage.exe"
+  if (-not (Test-Path $jpackage)) {
+    $jpackage = Join-Path $javaBin "jpackage"
+  }
+  if (-not (Test-Path $jpackage)) {
+    throw "jpackage not found in '$javaBin' (JDK 14 or newer required)."
+  }
+
+  Get-ChildItem $outDir -Filter *.zip -ErrorAction SilentlyContinue | Remove-Item -Force
+
+  $iconPath = Join-Path $srcDir "..\DuckDnsInstaller\logo.ico"
+  $bundleDir = Join-Path $PSScriptRoot "bundle"
+  if (Test-Path $bundleDir) {
+    Remove-Item -Recurse -Force $bundleDir
+  }
+  New-Item -ItemType Directory -Force -Path $bundleDir | Out-Null
+
+  $jpackageArgs = @(
+    "--type", "app-image",
+    "--name", "DuckDNS-Updater",
+    "--input", $outDir,
+    "--main-jar", "DuckDNS-Updater.jar",
+    "--main-class", "duckdns",
+    "--dest", $bundleDir,
+    "--app-version", $Version,
+    "--add-modules", "java.base,java.desktop,java.prefs,java.logging,jdk.crypto.ec"
+  )
+  if (Test-Path $iconPath) {
+    $jpackageArgs += @("--icon", $iconPath)
+  } else {
+    Write-Warning "icon not found at $iconPath, building without one"
+  }
+
+  & $jpackage @jpackageArgs
+  if ($LASTEXITCODE -ne 0) {
+    throw "jpackage failed"
+  }
+
+  $zipPath = Join-Path $outDir "DuckDNS-Updater-windows-x64.zip"
+  Compress-Archive -Path (Join-Path $bundleDir "*") -DestinationPath $zipPath
+  Write-Host "bundled $zipPath"
+}
