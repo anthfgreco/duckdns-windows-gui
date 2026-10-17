@@ -3,3 +3,5 @@ package-lock.json
 DuckDNSClient/bin/
 DuckDNSClient/build/
 *.class
+
+DuckDNSClient/*.jar
