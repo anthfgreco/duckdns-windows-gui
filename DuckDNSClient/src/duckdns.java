@@ -11,9 +11,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -30,12 +34,10 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 
 public class duckdns {
 
-  static String DuckDNSVersion = "DuckDns Updater (vs1.0.5)";
+  static String DuckDNSVersion = "DuckDNS Updater (vs1.1.0)";
   String TOOL_TIP = DuckDNSVersion;
   static String StatusMsg = "";
   String MESSAGE_HEADER = DuckDNSVersion;
@@ -192,9 +194,11 @@ public class duckdns {
 
           //Operation that will do when user click 'OK'
           if (a == JOptionPane.OK_OPTION) {
-            if (domainField.getText().length() > 0 && tokenField.getText().length() > 0) {
-              prefs.put("domain", domainField.getText().replace(".duckdns.org", ""));
-              prefs.put("token", tokenField.getText());
+            if (
+              domainField.getText().trim().length() > 0 && tokenField.getText().trim().length() > 0
+            ) {
+              prefs.put("domain", domainField.getText().trim().replace(".duckdns.org", ""));
+              prefs.put("token", tokenField.getText().trim());
               prefs.put("refresh", minuteField.getSelectedItem().toString());
               String ip = getip();
               //  prefs.put("oldipaddress", ip);
@@ -234,35 +238,37 @@ public class duckdns {
                   JOptionPane.INFORMATION_MESSAGE
                 );
               }
-            } else if (domainField.getText().length() < 1 && tokenField.getText().length() < 1) {
+            } else if (
+              domainField.getText().trim().length() < 1 && tokenField.getText().trim().length() < 1
+            ) {
               JOptionPane.showMessageDialog(
                 frame,
                 "Missing DuckDNS domain & token! Please try again!",
                 "False",
                 JOptionPane.ERROR_MESSAGE
               );
-              prefs.put("domain", domainField.getText());
-              prefs.put("token", tokenField.getText());
+              prefs.put("domain", domainField.getText().trim());
+              prefs.put("token", tokenField.getText().trim());
               prefs.put("refresh", minuteField.getSelectedItem().toString());
-            } else if (domainField.getText().length() < 1) {
+            } else if (domainField.getText().trim().length() < 1) {
               JOptionPane.showMessageDialog(
                 frame,
                 "Missing DuckDNS domain name! Please try again!",
                 "False",
                 JOptionPane.ERROR_MESSAGE
               );
-              prefs.put("domain", domainField.getText());
-              prefs.put("token", tokenField.getText());
+              prefs.put("domain", domainField.getText().trim());
+              prefs.put("token", tokenField.getText().trim());
               prefs.put("refresh", minuteField.getSelectedItem().toString());
-            } else if (tokenField.getText().length() < 1) {
+            } else if (tokenField.getText().trim().length() < 1) {
               JOptionPane.showMessageDialog(
                 frame,
                 "Missing DuckDNS token! Please try again!",
                 "False",
                 JOptionPane.ERROR_MESSAGE
               );
-              prefs.put("domain", domainField.getText());
-              prefs.put("token", tokenField.getText());
+              prefs.put("domain", domainField.getText().trim());
+              prefs.put("token", tokenField.getText().trim());
               prefs.put("refresh", minuteField.getSelectedItem().toString());
             }
           }
@@ -291,7 +297,7 @@ public class duckdns {
           JEditorPane ep = new JEditorPane(
             "text/html",
             DuckDNSVersion +
-              "<br>Developed by: ETX Software Inc.<br><html><a href=\"http://www.ETX.ca\">www.ETX.ca</a></html>"
+              "<br>Developed by: ETX Software Inc.<br><html><a href=\"https://www.ETX.ca\">www.ETX.ca</a></html>"
           );
 
           // handle link events
@@ -330,38 +336,14 @@ public class duckdns {
         public void actionPerformed(ActionEvent e) {
           String ip = getip();
 
-          // for copying style
-          JLabel label = new JLabel();
-          Font font = label.getFont();
-
-          // create some css from the label's font
-          StringBuffer style = new StringBuffer("font-family:" + font.getFamily() + ";");
-          style.append("font-weight:" + (font.isBold() ? "bold" : "normal") + ";");
-          style.append("font-size:" + font.getSize() + "pt;");
-
-          // html content
-          JEditorPane ep = new JEditorPane(
-            "text/html",
-            "Your External IP Address: \n<html><a href=\"http://checkip.amazonaws.com\">" +
-              ip +
-              "</a></html>"
+          JOptionPane.showMessageDialog(
+            null,
+            ip.isEmpty()
+              ? "Unable to detect your public IPv4 address. Check your Internet connection."
+              : "Your public IPv4 address: " + ip,
+            "DuckDNS",
+            JOptionPane.INFORMATION_MESSAGE
           );
-
-          // handle link events
-          ep.addHyperlinkListener(
-            new HyperlinkListener() {
-              public void hyperlinkUpdate(HyperlinkEvent e) {
-                if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
-                  launchUrl(e.getURL().toString()); // roll your own link launcher or use Desktop if J6+
-                }
-              }
-            }
-          );
-          ep.setEditable(false);
-          ep.setBackground(label.getBackground());
-
-          // show
-          JOptionPane.showMessageDialog(null, ep);
         }
       }
     );
@@ -376,48 +358,40 @@ public class duckdns {
     );
   }
 
-  private static String getip() {
-    Document doc = null;
-    String url = "http://checkip.amazonaws.com";
-    String ip = "";
+  private static String readHttps(String address) throws IOException {
+    HttpURLConnection connection = (HttpURLConnection) new URL(address).openConnection();
+    connection.setConnectTimeout(10000);
+    connection.setReadTimeout(10000);
+    connection.setRequestProperty("Cache-Control", "no-cache");
+    try (InputStream stream = connection.getInputStream()) {
+      return new String(stream.readAllBytes(), StandardCharsets.UTF_8).trim();
+    } finally {
+      connection.disconnect();
+    }
+  }
 
+  private static String getip() {
     try {
-      doc = Jsoup.connect(url)
-        .header("Cache-Control", "no-cache")
-        .ignoreHttpErrors(true)
-        .ignoreContentType(true)
-        .timeout(10 * 1000)
-        .get();
-      ip = doc.text();
-    } catch (IOException e) {
-      e.printStackTrace();
+      String ip = readHttps("https://checkip.amazonaws.com");
+      return ip.matches("[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+") ? ip : "";
+    } catch (IOException ex) {
+      return "";
     }
-    if (doc.text().length() < 7) {
-      // can't get ip address, let DuckDNS to resolve it
-      ip = "";
-    }
-    return ip;
   }
 
   private static String updateDuckDNS(String domain, String token, String ipaddress) {
     String url =
-      "http://www.duckdns.org/update?domains=" + domain + "&token=" + token + "&ip=" + ipaddress;
-    Document doc = null;
-    String ua =
-      "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.2 (KHTML, like Gecko) Chrome/15.0.874.120 Safari/535.2";
+      "https://www.duckdns.org/update?domains=" +
+      URLEncoder.encode(domain.trim(), StandardCharsets.UTF_8) +
+      "&token=" +
+      URLEncoder.encode(token.trim(), StandardCharsets.UTF_8) +
+      "&ip=" +
+      URLEncoder.encode(ipaddress.trim(), StandardCharsets.UTF_8);
     try {
-      //	doc = Jsoup.connect(url).ignoreHttpErrors(true).timeout(10 * 1000).get();
-      doc = Jsoup.connect(url)
-        .userAgent(ua)
-        .ignoreHttpErrors(true)
-        .ignoreContentType(true)
-        .timeout(10 * 1000)
-        .get();
-    } catch (IOException e) {
-      e.printStackTrace();
+      return readHttps(url);
+    } catch (IOException ex) {
+      return "NETWORK_ERROR";
     }
-
-    return doc.text();
   }
 
   private static void updatetraytip() {
@@ -441,8 +415,7 @@ public class duckdns {
   private static void launchUrl(String urlToLaunch) {
     try {
       if (
-        !Desktop.isDesktopSupported() ||
-        !Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)
+        !Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)
       ) {
         JOptionPane.showMessageDialog(
           null,
@@ -503,8 +476,6 @@ public class duckdns {
       if (timercount > Integer.parseInt(prefs.get("refresh", "5")) * 60) {
         // repeat on interval
         try {
-          //Thread.sleep(Integer.parseInt(prefs.get("refresh", "5"))*60000);
-
           String resultofipcheck;
           String ip;
 
