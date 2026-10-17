@@ -1,0 +1,24 @@
+{
+  "name": "duckdns-windows-gui",
+  "version": "1.0.0",
+  "description": "Windows system tray updater for DuckDNS (duckdns.org) dynamic DNS",
+  "private": true,
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anthfgreco/DuckDNS-Windows-GUI.git"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/anthfgreco/DuckDNS-Windows-GUI/issues"
+  },
+  "homepage": "https://github.com/anthfgreco/DuckDNS-Windows-GUI#readme",
+  "devDependencies": {
+    "prettier": "^3.9.10",
+    "prettier-plugin-java": "^2.11.0"
+  }
+}

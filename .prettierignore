@@ -1,0 +1,10 @@
+node_modules/
+DuckDNSClient/jsoup-1.6.2.jar
+DuckDNSClient/DuckDnsInstaller/
+DuckDNSClient/.settings/
+*.jar
+*.png
+*.launch
+*.classpath
+*.project
+LICENSE
