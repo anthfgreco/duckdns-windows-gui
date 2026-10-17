@@ -5,3 +5,4 @@ DuckDNSClient/build/
 *.class
 
 DuckDNSClient/*.jar
+dist/
