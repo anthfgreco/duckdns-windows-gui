@@ -7,3 +7,5 @@ DuckDNSClient/build/
 DuckDNSClient/*.jar
 dist/
 bundle/
+installer/
+stage/

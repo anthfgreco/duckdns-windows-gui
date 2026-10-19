@@ -37,7 +37,7 @@ import javax.swing.event.HyperlinkListener;
 
 public class duckdns {
 
-  static String DuckDNSVersion = "DuckDNS Windows GUI (vs1.2.0)";
+  static String DuckDNSVersion = "DuckDNS Windows GUI (vs1.3.0)";
   String TOOL_TIP = DuckDNSVersion;
   static String StatusMsg = "";
   String MESSAGE_HEADER = DuckDNSVersion;
