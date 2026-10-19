@@ -1,12 +1,15 @@
-# DuckDNS Updater for Windows
+# DuckDNS Windows GUI
 
 Lightweight system tray app that keeps your duckdns.org domain
 pointed at your current public IP.
 
 ## Download
 
-Get DuckDNS-Updater.jar from [Releases], then run:
-`java -jar DuckDNS-Updater.jar` (Java 11+, nothing else needed)
+Get the latest release from [Releases]:
+
+- **Setup installer** -- `DuckDNS-Windows-GUI-Setup.exe` (Windows, no Java needed)
+- **Portable** -- `DuckDNS-Windows-GUI.zip` (Windows, no Java needed, extract and run)
+- **Jar** -- `DuckDNS-Windows-GUI.jar` (`java -jar DuckDNS-Windows-GUI.jar`, Java 11+)
 
 ## Setup
 
@@ -16,8 +19,11 @@ Get DuckDNS-Updater.jar from [Releases], then run:
 
 ## Build
 
-`pwsh ./build.ps1` (JDK 11+)
+`pwsh ./build.ps1` (JDK 11+). Add `-Bundle -Installer -Version 1.3.0` to also
+build the portable zip and the installer exe (the installer step needs WiX 3.x).
 
 GPL-2.0. Fork of DuckDNSClient (ETX Software), modernized:
 HTTPS via the JDK http client, jsoup removed, input trimmed
 and URL-encoded, no credentials in error paths.
+
+[Releases]: https://github.com/anthfgreco/duckdns-windows-gui/releases

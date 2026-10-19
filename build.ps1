@@ -65,7 +65,7 @@ if ($LASTEXITCODE -ne 0) {
 
 Copy-Item (Join-Path $srcDir "logo.png") (Join-Path $buildDir "logo.png") -Force
 
-$outJar = Join-Path $outDir "DuckDNS-Updater.jar"
+$outJar = Join-Path $outDir "DuckDNS-Windows-GUI.jar"
 & $jarExe --create --file $outJar --main-class duckdns -C $buildDir .
 if ($LASTEXITCODE -ne 0) {
   throw "jar packaging failed"
@@ -94,9 +94,9 @@ if ($Bundle) {
 
   $jpackageArgs = @(
     "--type", "app-image",
-    "--name", "DuckDNS-Updater",
+    "--name", "DuckDNS-Windows-GUI",
     "--input", $outDir,
-    "--main-jar", "DuckDNS-Updater.jar",
+    "--main-jar", "DuckDNS-Windows-GUI.jar",
     "--main-class", "duckdns",
     "--dest", $bundleDir,
     "--app-version", $Version,
@@ -113,7 +113,7 @@ if ($Bundle) {
     throw "jpackage failed"
   }
 
-  $zipPath = Join-Path $outDir "DuckDNS-Updater-windows-x64.zip"
+  $zipPath = Join-Path $outDir "DuckDNS-Windows-GUI.zip"
   Compress-Archive -Path (Join-Path $bundleDir "*") -DestinationPath $zipPath
   Write-Host "bundled $zipPath"
 }
